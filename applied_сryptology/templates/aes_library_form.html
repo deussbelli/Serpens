@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  
+    <style>
+        #image1 {
+        position: absolute;
+        left:340px; 
+        bottom: 480px; 
+        width: auto;
+        height: auto;
+        z-index: 1000;
+        pointer-events: none; 
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='images/image3 (2).png') }}" class="custom-image" id="image1" alt="Image 1">
+    </div>
+    
+    <div class="form-container">
+        <h2>SELECT CIPHER</h2>
+        <form action="{{ url_for('form') }}" method="post">
+            <div class="dropdown-container">
+                <select name="encryption_method" class="custom-select" onchange="this.form.submit()">
+                    <option value="" disabled selected>Select method</option>
+                    <option value="des">DES</option>
+                    <option value="des_library">DES Library</option>
+                    <option value="aes">AES</option>
+                    <option value="aes_library">AES Library</option>                    
+                    <option value="merkle_hellman">Merkle–Hellman</option>
+                    <option value="bbs">BBS</option>
+                    <option value="asymmetric">Asymmetric Cryptosystem</option>
+                    <option value="certificate">Certificate</option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        <h1>AES Library Cipher</h1>
+        <form id="aes-lib-form" method="POST" enctype="multipart/form-data">
+    
+            <div>
+                <label for="encryption_mode">Select mode:</label>
+                <select id="encryption_mode" name="encryption_mode" onchange="updateIVOptions()">
+                    <option value="ECB">ECB</option>
+                    <option value="CBC">CBC</option>
+                    <option value="CFB">CFB</option>
+                    <option value="OFB">OFB</option>
+                </select>
+            </div>
+
+    
+            <div id="iv_section" style="display: none;">
+                <label for="iv_method">Select mode for IV:</label>
+                <select id="iv_method" name="iv_method" onchange="updateIVOptions()">  
+                    <option value="upload">Upload</option>
+                    <option value="generate">Generate</option>
+                    <option value="enter">Enter manually</option>
+                </select>
+            </div>
+
+    
+            <div id="iv_generation" style="display: none;">
+                <label for="generated_iv">Generated IV:</label>
+                <input type="text" id="generated_iv" name="generated_iv" readonly>
+                <button type="button" onclick="generateIV()">Regenerate</button>
+                <button type="button" onclick="downloadIV()">Download</button>
+            </div>
+
+            <div id="iv_input" style="display: none;">
+                <label for="iv">Enter IV (hex):</label>
+                <input type="text" id="iv" name="iv" placeholder="Enter IV (32 hex characters)" maxlength="32">
+            </div>
+
+            <div id="iv_upload" style="display: none;">
+                <label for="iv_file">Upload the file for IV (bin):</label>
+                <input type="file" id="iv_file" name="iv_file" accept=".bin">
+            </div>
+
+    
+            <div>
+                <label for="key_mode">Select key:</label>
+                <select id="key_mode" name="key_mode" onchange="updateKeyOptions()">
+                    <option value="load">Upload</option>
+                    <option value="generate">Generate</option>
+                    <option value="enter">Enter manually</option>
+                </select>
+            </div>
+
+            <div id="key_options">
+    
+                <div id="load_key">
+                    <label for="key_file">Select the file with the key (bin):</label>
+                    <input type="file" id="key_file" name="key_file" accept=".bin">
+                </div>
+
+             
+                <div id="enter_key" style="display:none;">
+                    <label for="key_input">Enter key (hex):</label>
+                    <input type="text" id="key_input" name="key_input" placeholder="Enter key (32 hex characters)" maxlength="32">
+                </div>
+
+         
+                <div id="generate_key" style="display:none;">
+                    <label for="generated_key">Generated key:</label>
+                    <input type="text" id="generated_key" name="generated_key" readonly>
+                    <button type="button" onclick="generateKey()">Regenerate</button>
+                    <button type="button" onclick="downloadKey()">Download</button>
+                </div>
+            </div>
+
+            <div>
+                <label for="file">Select file:</label>
+                <input type="file" id="file" name="file" onchange="updateFileFormat()">
+                <p id="file_format"></p>
+            </div>
+
+            <div>
+                <label for="action">Select action:</label>
+                <select id="action" name="action" onchange="showStartButton()">
+                    <option value="">-- Select action --</option>
+                    <option value="encrypt">Encrypt</option>
+                    <option value="decrypt">Decrypt</option>
+                    <option value="saveimg">Encrypt Image [PNG | JPG]</option>
+                    <option value="unsaveimg">Decrypt Image [PNG | JPG]</option>
+                </select>
+            </div>
+      
+            <div id="start_button_container" style="display: none;">
+                <button type="submit">Start</button>
+            </div>
+
+            <div>
+                <p id="key_message">{{ key_message }}</p>
+                <p id="iv_message">{{ iv_message }}</p>     
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function updateIVOptions() {
+            const encryptionMode = document.getElementById('encryption_mode').value;
+            const ivSection = document.getElementById('iv_section');
+            const ivMethod = document.getElementById('iv_method').value;
+
+            if (['CBC', 'CFB', 'OFB'].includes(encryptionMode)) {
+                ivSection.style.display = 'block';
+                document.getElementById('iv_generation').style.display = ivMethod === 'generate' ? 'block' : 'none';
+                document.getElementById('iv_input').style.display = ivMethod === 'enter' ? 'block' : 'none';
+                document.getElementById('iv_upload').style.display = ivMethod === 'upload' ? 'block' : 'none';
+            } else {
+                ivSection.style.display = 'none';
+                document.getElementById('iv_generation').style.display = 'none';
+                document.getElementById('iv_input').style.display = 'none';
+                document.getElementById('iv_upload').style.display = 'none';
+            }
+        }
+
+        function updateKeyOptions() {
+            const keyMode = document.getElementById('key_mode').value;
+            document.getElementById('load_key').style.display = keyMode === 'load' ? 'block' : 'none';
+            document.getElementById('enter_key').style.display = keyMode === 'enter' ? 'block' : 'none';
+            document.getElementById('generate_key').style.display = keyMode === 'generate' ? 'block' : 'none';
+        }
+
+        function generateKey() {
+            const key = new Uint8Array(16);  // 16 bytes for AES-128
+            window.crypto.getRandomValues(key);
+            const keyHex = Array.from(key)
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('');
+            document.getElementById('generated_key').value = keyHex;
+        }
+
+        function downloadKey() {
+            const keyHex = document.getElementById('generated_key').value;
+            const key = new Uint8Array(keyHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            const blob = new Blob([key], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated_key.bin';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function generateIV() {
+            const iv = new Uint8Array(16);  // AES IV is always 16 bytes
+            window.crypto.getRandomValues(iv);
+            const ivHex = Array.from(iv)
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('');
+            document.getElementById('generated_iv').value = ivHex;
+        }
+
+        function downloadIV() {
+            const ivHex = document.getElementById('generated_iv').value;
+            const iv = new Uint8Array(ivHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            const blob = new Blob([iv], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated_iv.bin';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showStartButton() {
+            const action = document.getElementById('action').value;
+            document.getElementById('start_button_container').style.display = action ? 'block' : 'none';
+        }
+
+        function updateFileFormat() {
+            const fileInput = document.getElementById('file');
+            const fileFormat = document.getElementById('file_format');
+            if (fileInput.files.length > 0) {
+                fileFormat.textContent = `Selected format: ${fileInput.files[0].type}`;
+            } else {
+                fileFormat.textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>

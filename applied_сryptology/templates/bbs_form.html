@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        #image1 {
+        position: absolute;
+        left:340px; 
+        bottom: 480px; 
+        width: auto;
+        height: auto;
+        z-index: 1000;
+        pointer-events: none; 
+        }
+    </style>
+
+</head>
+<body onload="updateValuesMode()">
+
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='images/image3 (2).png') }}" class="custom-image" id="image1" alt="Image 1">
+    </div>
+    
+    <div class="form-container">
+        <h2>SELECT CIPHER</h2>
+        <form action="{{ url_for('form') }}" method="post">
+            <div class="dropdown-container">
+                <select name="encryption_method" class="custom-select" onchange="this.form.submit()">
+                    <option value="" disabled selected>Select method</option>
+                    <option value="des">DES</option>
+                    <option value="des_library">DES Library</option>
+                    <option value="aes">AES</option>
+                    <option value="aes_library">AES Library</option>                    
+                    <option value="merkle_hellman">Merkle–Hellman</option>
+                    <option value="bbs">BBS</option>
+                    <option value="asymmetric">Asymmetric Cryptosystem</option>
+                    <option value="certificate">Certificate</option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        <body>
+            <h1>BBS Cipher</h1>
+
+            {% if error_message %}
+            <p style="color: red;">{{ error_message }}</p>
+            {% endif %}
+
+            <form id="bbs-form" method="POST" enctype="multipart/form-data">
+                    <div>
+                    <label for="file">Select file for encryption/decryption:</label>
+                    <input type="file" id="file" name="file" required>
+                </div>
+                <div>
+                    <div>
+                        <label for="values_mode">Select the method for obtaining values:</label>
+                        <select id="values_mode" name="values_mode" onchange="updateValuesMode()" default="upload">
+                            <option value="upload" selected>Upload</option>
+                            <option value="generate">Generate</option>
+                        </select>
+                    </div>
+
+                    <div id="generate_values_section" style="display: none;">
+                        <div>
+                            <label for="p">p (prime number):</label>
+                            <input type="text" id="p" name="p" readonly>
+                        </div>
+                        <div>
+                            <label for="q">q (prime number):</label>
+                            <input type="text" id="q" name="q" readonly>
+                        </div>
+                        <div>
+                            <label for="n">n (Blum integer):</label>
+                            <input type="text" id="n" name="n" readonly>
+                        </div>
+                        <div>
+                            <label for="x0">x0 (seed):</label>
+                            <input type="text" id="x0" name="x0">
+                        </div>
+                        <div>
+                            <button type="button" onclick="generateValues()">Generate</button>
+                            <button type="button" onclick="downloadValues()">Download</button>                        
+                            <button type="button" onclick="recalculate()">Recalculate for x0</button>
+                        </div>
+                    </div>
+
+                    <div id="upload_values_section" style="display: block;">
+                        <div>
+                            <label for="values_file">Select file with values:</label>
+                            <input type="file" id="values_file" name="values_file" accept=".json" onchange="uploadValues()">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="action">Select action:</label>
+                    <select id="action" name="action">
+                        <option value="encrypt">Encrypt</option>
+                        <option value="decrypt">Decrypt</option>
+                    </select>
+                </div>
+
+          
+                <div>
+                    <button type="submit">Start</button>
+                </div>
+            </form>
+        </div>
+
+    <script>
+        function updateValuesMode() {
+            const mode = document.getElementById('values_mode').value;
+            if (mode === 'generate') {
+                document.getElementById('generate_values_section').style.display = 'block';
+                document.getElementById('upload_values_section').style.display = 'none';
+            } else if (mode === 'upload') {
+                document.getElementById('generate_values_section').style.display = 'none';
+                document.getElementById('upload_values_section').style.display = 'block';
+            }
+        }
+
+        function generateValues() {
+            fetch('/generate_values', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'bits': 16 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('p').value = data.p;
+                document.getElementById('q').value = data.q;
+                document.getElementById('n').value = data.n;
+                document.getElementById('x0').value = data.x0;
+            });
+        }
+
+        function downloadValues() {
+            const values = {
+                p: document.getElementById('p').value,
+                q: document.getElementById('q').value,
+                n: document.getElementById('n').value,
+                x0: document.getElementById('x0').value
+            };
+            const blob = new Blob([JSON.stringify(values, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bbs_values.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function uploadValues() {
+            const input = document.getElementById('values_file');
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = event => {
+                    const values = JSON.parse(event.target.result);
+                    document.getElementById('p').value = values.p || '';
+                    document.getElementById('q').value = values.q || '';
+                    document.getElementById('n').value = values.n || '';
+                    document.getElementById('x0').value = values.x0 || '';
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please select a file.');
+            }
+        }
+
+        function recalculate() {
+            const x0 = document.getElementById('x0').value;
+            if (x0) {
+                fetch('/recalculate_for_x0', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 'x0': x0 })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('p').value = data.p || '';
+                    document.getElementById('q').value = data.q || '';
+                    document.getElementById('n').value = data.n || '';
+                    // x0 без змін
+                });
+            } else {
+                alert('Please enter an x0 value.');
+            }
+        }
+    </script>
+</body>
+</html>

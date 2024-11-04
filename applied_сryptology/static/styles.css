@@ -1,0 +1,155 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #ffffff);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 150px;
+    min-height: 100vh;
+}
+
+.form-container {
+    width: 80%;
+    max-width: 600px;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    margin: 0;
+}
+
+h2 {
+    text-align: center;
+    font-size: 34px;
+    color: #00796b;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 121, 107, 0.3);
+}
+
+.custom-select {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    color: #444;
+    border: 2px solid #b2dfdb;
+    border-radius: 12px;
+    background-color: #e0f2f1;
+    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: #00796b;
+    box-shadow: 0 0 10px rgba(0, 121, 107, 0.3);
+}
+
+button[type="submit"] {
+    border: none;
+    padding: 12px 60px;
+    font-size: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+    top: 15px;
+    left: 250px;
+}
+
+button {
+    background: linear-gradient(135deg, #00796b, #004d40);
+    color: #fff;
+    border: none;
+    padding: 14px 30px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 12px;
+    margin: 10px 10px 10px 40px;
+    box-shadow: 0 8px 20px rgba(0, 121, 107, 0.3);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #004d40, #00796b);
+    box-shadow: 0 10px 30px rgba(0, 121, 107, 0.4);
+}
+
+button:active {
+    transform: translateY(3px);
+}
+
+input[type="text"], input[type="file"], select {
+    width: 90%;
+    padding: 14px;
+    margin: 10px 0;
+    border: 2px solid #b2dfdb;
+    border-radius: 12px;
+    background-color: #e0f2f1;
+    font-size: 16px;
+    color: #333;
+    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out, border-color 0.3s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #00796b;
+    box-shadow: 0 0 10px rgba(0, 121, 107, 0.3);
+}
+
+p {
+    font-size: 14px;
+    color: #616161;
+    text-align: center;
+}
+
+.container {
+    background: #ffffff;
+    width: 80%;
+    max-width: 700px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    margin: 0;
+}
+
+h1 {
+    text-align: center;
+    font-size: 34px;
+    color: #00796b;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 121, 107, 0.3);
+}
+
+#iv_section, #iv_generation, #iv_input, #iv_upload, #load_key, #enter_key, #generate_key, #start_button_container#generate_values_section, #upload_values_section {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 20px;
+}
+
+#iv_section, #iv_generation, #iv_input, #iv_upload, #load_key, #enter_key, #generate_key, #generate_values_section, #upload_values_section {
+    display: block;
+    max-width: 500px;
+    padding: 5px;
+    background: rgba(240, 240, 240, 0.9);
+    border: 2px dashed #b2dfdb;
+    border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+    .container, .form-container {
+        width: 95%;
+        padding: 20px;
+    }
+
+    button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}

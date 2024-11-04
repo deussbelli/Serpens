@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>SELECT CIPHER</h2>
+        <form action="{{ url_for('form') }}" method="post">
+            <div class="dropdown-container">
+                <select name="encryption_method" class="custom-select" onchange="this.form.submit()">
+                    <option value="" disabled selected>Select method</option>
+                    <option value="des">DES</option>
+                    <option value="des_library">DES Library</option>
+                    <option value="aes">AES</option>
+                    <option value="aes_library">AES Library</option>                    
+                    <option value="merkle_hellman">Merkle–Hellman</option>
+                    <option value="bbs">BBS</option>
+                    <option value="asymmetric">Asymmetric Cryptosystem</option>
+                    <option value="certificate">Certificate</option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        <h1>Merkle–Hellman Cryptosystem</h1>
+        <form id="mh-form" action="{{ url_for('merkle_hellman_form_route') }}" method="POST" enctype="multipart/form-data">
+            
+            <div>
+                <label for="file">Select file:</label>
+                <input type="file" id="file" name="file" required>
+            </div>
+
+            
+            <div>
+                <button type="button" onclick="generateKeyPair()">Generate a key pair</button>
+            </div>
+
+            <div>
+                <label for="public_key_file">Upload public key:</label>
+                <input type="file" id="public_key_file" name="public_key_file">
+            </div>
+
+            <div>
+                <label for="private_key_file">Upload private key:</label>
+                <input type="file" id="private_key_file" name="private_key_file">
+            </div>
+
+            <div>
+                <label for="action">Select action:</label>
+                <select id="action" name="action" required>
+                    <option value="">-- Select action --</option>
+                    <option value="encrypt">Encrypt</option>
+                    <option value="decrypt">Decrypt</option>
+                </select>
+            </div>
+
+            <div>
+                <button type="submit">Start</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        function generateKeyPair() {
+            fetch("{{ url_for('generate_key_pair') }}", {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const publicKeyBlob = new Blob([data.public_key], {type: 'text/plain'});
+                const publicUrl = window.URL.createObjectURL(publicKeyBlob);
+                const a1 = document.createElement('a');
+                a1.href = publicUrl;
+                a1.download = 'public_key.txt';
+                document.body.appendChild(a1);
+                a1.click();
+                a1.remove();
+
+                const privateKeyBlob = new Blob([data.private_key], {type: 'text/plain'});
+                const privateUrl = window.URL.createObjectURL(privateKeyBlob);
+                const a2 = document.createElement('a');
+                a2.href = privateUrl;
+                a2.download = 'private_key.txt';
+                document.body.appendChild(a2);
+                a2.click();
+                a2.remove();
+            })
+            .catch(error => {
+                alert('Error when generating keys: ' + error);
+            });
+        }
+    </script>
+</body>
+</html>

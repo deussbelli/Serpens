@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        .image-container {
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+        }
+
+        #image2 {
+        position: relative;
+        left: 700px; 
+        bottom: 300px; 
+        width: 500px;
+        height: auto;
+        }
+
+        #image1 {
+        position: relative;
+        right: 250px; 
+        top: 150px; 
+        width: 150px;
+        height: auto;
+        }
+
+
+    </style>
+</head>
+<body>    
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='images/image3.png') }}" class="custom-image" id="image2" alt="Image 2">
+    </div>
+    
+    <div class="form-container">
+        <h1>Select Cipher</h1>
+        <form action="{{ url_for('form') }}" method="post">
+            <label for="encryption_method">Choose Cipher:</label>
+            <select name="encryption_method" id="encryption_method" onchange="this.form.submit()">
+                <option value="" disabled selected>Select a method</option>
+                <option value="des">DES</option>
+                <option value="des_library">DES Library</option>
+                <option value="aes">AES</option>
+                <option value="aes_library">AES Library</option>                              
+                <option value="merkle_hellman">Merkle–Hellman</option>
+                <option value="bbs">BBS</option>
+                <option value="asymmetric">Asymmetric Cryptosystem</option>
+                <option value="certificate">Certificate</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" class="custom-image" id="image1" alt="Image 1">
+    </div>
+</body>
+</html>
